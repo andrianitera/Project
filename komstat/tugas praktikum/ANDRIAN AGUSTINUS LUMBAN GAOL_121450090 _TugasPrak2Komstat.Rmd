@@ -1,0 +1,186 @@
+---
+title: "Tugas Praktikum 2 KOMSTAT"
+author: "Andrian Agusitinus Lumban Gaol"
+date: "2023-10-10"
+output:
+  word_document: default
+  html_document: default
+---
+# **Tugas Praktikum 2 KOMSTAT**
+Nama    : Andrian Agusitinus Lumban Gaol
+NIM     : 121450090
+Kelas   : RA
+
+## 1. Simulasikan peubah acak diskrit x berikut, dengan distribusinya sesuai dengan tabel berikut dengan metode Inverse-Transform method dengan n=1000
+
+> | 𝑥𝑖  | 𝑃(𝑋 = 𝑥𝑖) |
+> |-----|-----------|
+> | 0   | 0.4       |
+> | 2   | 0.2       |
+> | 3   | 0.1       |
+> | 7   | 0.1       |
+> | 10  | 0.2       |
+
+```{r}
+# fungsi nuntuk menghasilkan sampel dari distribusi diskrit
+discrete_inverse_sampling <- function(prob) {
+  # angka acak U dari distribusi uniform [0, 1]
+  U = runif(1)  
+
+  # memeriksa apakah U kurang dari atau sama dengan prob[1]
+  if (U <= prob[1]) {
+    return(1)  # mengembalikan nilai 1 jika kondisi terpenuhi
+  }
+
+  # oop melalui probabilitas dan mencari rentang di mana U berada
+  for (state in 2:length(prob)) {
+    if (sum(prob[1:(state-1)]) < U && U <= sum(prob[1:state])) {
+      return(state)  # mengembalikan nilai state jika kondisi terpenuhi
+    }
+  }
+}
+
+# sampel
+n = 1000
+
+# probabilitas distribusi diskrit
+prob = c(0.4, 0.2, 0.1, 0.1, 0.2)
+names(prob) = c("0", "2", "3", "7", "10")
+
+# membuat vektor untuk menyimpan hasil sampel
+samples = runif(n)
+
+# melakukan inverse sampling untuk menghasilkan sampel sebanyak num_samples
+for (i in seq_len(n)) {
+  samples[i] = discrete_inverse_sampling(prob)
+}
+
+# menghitung probabilitas empiris dari sampel yang dihasilkan
+sim_prob = table(samples) / sum(table(samples))
+
+# memberikan nama pada probabilitas empiris
+names(sim_prob) = c("0", "2", "3", "7", "10")
+
+# menampilkan barplot dari probabilitas empiris
+barplot(sim_prob)
+
+```
+**Aalisis**
+dari plot yang dihasilkan dapat dilihat distribusi setiap variabel acak sebanya 1000, dimana distribus mengikuti rentang yangsudah di berikan, dengan distribus terbanyak ada pada x= 0 dan pasling sedikit ada di x=3 dan x=7
+
+## 2. Simulasikan peubah acak diskrit x berikut, dengan distribusinya sesuai dengan tabel berikut dengan metode Inverse-Transform method dengan n=1000
+
+> | 𝑥𝑖  | 𝑃(𝑋 = 𝑥𝑖) |
+> |-----|-----------|
+> | 0   | 0.1       |
+> | 1   | 0.2       |
+> | 2   | 0.2       |
+> | 3   | 0.2       |
+> | 4   | 0.3       |
+
+```{r}
+# sampel
+n <- 1000
+
+# probabilitas distribusi diskrit
+prob <- c(0.1, 0.2, 0.2, 0.2, 0.3)
+names(prob) <- c("0", "1", "2", "3", "4")
+
+# membuat vektor untuk menyimpan hasil sampel
+samples <- runif(n)
+
+# melakukan inverse sampling untuk menghasilkan sampel sebanyak num_samples
+for (i in seq_len(n)) {
+  samples[i] <- discrete_inverse_sampling(prob)
+}
+
+# menghitung probabilitas empiris dari sampel yang dihasilkan
+sim_prob <- table(samples) / sum(table(samples))
+
+# memberikan nama pada probabilitas empiris
+names(sim_prob) <- c("0", "1", "2", "3", "4")
+
+# menampilkan barplot dari probabilitas empiris
+barplot(sim_prob)
+
+```
+**Aalisis**
+dari plot yang dihasilkan dapat dilihat distribusi setiap variabel acak sebanya 1000, dimana distribus mengikuti rentang yang sudah di berikan, dengan distribus terbanyak ada pada x=4 dan paling sedikit ada di x=0
+
+## 3. Bangkitkan bilangan acak dengan 𝑓(𝑥) = 4e^−4𝑥, dengan𝑥 ∈ 𝑅. Gunakan metode Inverse Transform method dengan n=1000
+```{r}
+# sampel
+n = 1000
+
+# menghasilkan n angka acak dari distribusi uniform [0, 1]
+u = runif(n)
+
+# Menggunakan inverse transform sampling untuk menghasilkan variabel acak eksponensial, variabel acak eksponensial dihasilkan dengan parameter rate (laju) = 4
+x =  -log(1-u)/4
+
+# membuat histogram dari variabel acak x
+hist(x, freq=F, xlab = 'x')
+
+# membuat kurva distribusi eksponensial dengan parameter rate = 2 dan menambahkannya ke plot histogram sebelumnya (add = T)
+curve(dexp(x, rate=2), 0, 3, lwd=2, xlab = "", ylab = "", add = T)
+
+```
+**Aalisis**
+dari plot yang dihasikan dapat dilihat frekuensi relatif menurun  seiring  bertambahnya peubah acak x, atau menurun secara eksponensial sampai peubah acak x>1.5, pada kurva laju, dapat dilihat laju cenderung menurun seiring  bertambahnya peubah acak x
+
+## 4. Bangkitkan bilangan acak dengan $f(x)=3/32 \ \ x^5$, dengan 0 \< 𝑥 \< 2. Gunakan metode Inverse-Transform method dengan n=1000
+```{r}
+n = 1000
+u = runif(n)
+x = (64*u)**(1/6) # menggunakan transformasi untuk menghasilkan sampel dari distribusi yang diberikan
+x = (64*u)^(1/6)
+
+
+hist(x, freq=F, xlab = 'x')
+curve(dexp(x, rate=2) , 0, 3, lwd=2, xlab = "", ylab = "", add = T)
+```
+**Aalisis**
+dari plot yang dihasikan dapat dilihat frekuensi relatif naik  seiring  bertambahnya peubah acak x, atau meningkat secara eksponensial sampai peubah acak x=2 , namum pada kurva laju, dapat dilihat laju cenderung menurun seiring  bertambahnya peubah acak x
+
+## 5. Bangkitkan bilangan acak dengan metode Acceptance -- rejection dengan fungsi PDF nya
+```{r}
+# sampel
+n = 1000
+
+# inisialisasi variabel j dan k
+j = k = 0
+
+# vektor kosong y untuk menyimpan sampel yang diterima
+y = numeric(n)
+
+# loop
+while (k < n) {
+  # menghasilkan angka acak u dari distribusi uniform [0, 1]
+  u = runif(1)
+  
+  # menambahkan 1 ke j
+  j = j + 1
+  
+  # menghasilkan angka acak x dari distribusi uniform [0, 1]
+  x = runif(1)
+  
+  # memeriksa apakah x diterima berdasarkan perbandingan dengan fungsi proporsi
+  if (u < (((3/2) * (x^3)) + ((11/8) * (x^2)) + ((1/6) * x) + (1/2)) / (3.5 * dunif(x, 0, 1))) {
+    # Jika x diterima, tambahkan 1 ke k dan simpan x di dalam vektor y
+    k = k + 1
+    y[k] = x
+  }
+}
+
+# histogram
+hist(y, prob = TRUE)
+
+# membuat kurva teoritis yang digunakan dalam perbandingan
+sbx <- seq(0, 1, 0.01)
+lines(sbx, ((3/2) * (sbx^3)) + ((11/8) * (sbx^2)) + ((1/6) * sbx) + (1/2))
+
+```
+**Aalisis**
+dari  pllot  yang dihasilkan dapatdilihat frekuensi reatif naik seiring bertambahnya peubah acak x, atau meningkat secara eksponensial sampai peubah acak x=1, pada kurva laju, dapat dilihat laju cenderung menurun seiring  bertambahnya peubah acak x
+
+

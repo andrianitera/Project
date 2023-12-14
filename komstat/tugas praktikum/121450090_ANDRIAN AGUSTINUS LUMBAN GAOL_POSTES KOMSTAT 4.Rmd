@@ -1,0 +1,191 @@
+---
+title: "PRAKTIKUM KOMSTAT 4"
+author: "ANDRIAN AGUSTINUS LUMBAN GAOL"
+date: "2023-11-29"
+output:
+  word_document: default
+  html_document: default
+---
+
+## Latihan
+
+### 1. Buatlah suatu fungsi untuk bilangan fibonnacci.
+
+$$ F(n) = 
+\begin{cases}
+    0, & \text{jika } n = 0 \\
+    1, & \text{jika } n = 1 \\
+    F(n-1) + F(n-2), & \text{jika } n > 1
+\end{cases}
+$$
+
+```{r}
+fibonacci <- function(n){
+x<- c(0,1)
+while (length(x)<n) {
+position <- length(x)
+new <- x[position]+x[position-1]
+x <- c(x,new)
+}
+return(x)
+}
+fibonacci(10)
+```
+**Analisis** Dari output tersebut dapat dilihat pemanggilan fungsi fibbonacci berhasil, dimana output berupa bilangna yang di jumlah dengan bilangan sebelumnya
+
+
+### 2. Buatlah grafik dari $f(x, y) = x^2y^2$ dengan menggunakan fungsi dalam R
+
+```{r}
+x<- seq(-2,2, by=0.1)
+y <- seq(-2,2, by=0.1)
+f2 <- function(x,y){
+x^2*y^2
+}
+z <- outer(x,y,f2)
+persp(x,y,z, phi = 180, col="lightblue")
+```
+**Analisis** Grafik diatas adalah hasil dari fungsi yang sudah diberikan, dimana grafik tersebut membentuk parabola, hal ini disebabkan adanya kuadrat dalam fungsi 
+
+### 3. Buatlah fungsi bilangan berpangkat $f(x, y) = (x + y)^n$ dengan berdistribusi uniform dalam bentuk
+
+```{r}
+bilangan_acak = function(a,n){
+x=runif(a)
+y= runif(a)
+z=(x+y)^n
+return(z)
+}
+bilangan_acak(3,2)
+```
+
+### 4. Buatlah fungsi untuk mencari median dari vektor.
+
+```{r}
+#cara biasa
+x <- c(3,4,5,7)
+median(x)
+
+#menggunakan fungsi
+median_1 <- function(vect){
+n <- length(vect)
+vects <- sort(vect)
+if(n%%2 == 1){m <- vects[(n+1)/2]}
+else{m <- (vects[n/2]+vects[(n/2)+1])/2}
+return(m)
+}
+x <- c(3,4,5,7)
+median_1(x)
+```
+**Analisis** dari perbandingan output dapat dilihat fugnsi berjalan denga baik, karena hasil dari penggunaan fungsi median dan median_1 sama
+
+
+### 5. Buatlah suatu objek Bernama UTSKomstat yang dibuat dengan fungsi data.frame. Isis dari objek tersebut didasarkan pada Tabel dibawah ini
+
+![](images/Screenshot%202023-11-29%20155944.png)
+
+```{r}
+Nama <- c("Edo", "Edi", "Eda", "Edu", "Ede")
+UTS <- c(55.51543, 60.92425, 67.93923, 54.34812, 59.59874)
+Praktikum <- c(80.66210, 83.53977, 78.80151, 89.92237, 79.30606)
+
+UTSKomstat <- data.frame(Nama, UTS, Praktikum)
+UTSKomstat
+```
+
+```{r}
+UTSKomstat
+```
+
+#### a.Periksa class dari UTSKomstat.
+
+```{r}
+class(UTSKomstat)
+```
+
+Kelas dari UTSKomstat adalah dataframe
+
+#### b.Periksa fungsi / metode (generik) apa yang bisa digunakan pada class ini, apakah fungsi summary bisa digunakan? Jika iya, coba Anda jalankan fungsi summary tersebut.
+
+```{r}
+class_name <- class(UTSKomstat)
+showMethods(classes = class_name)
+summary(UTSKomstat)
+
+```
+**Analisis** dari otput tersebut dapat disimpulkan class ini dapat diilakukan fungsi summary, dimana fungsi menampilkan informasi statistik dari class tersebut
+
+
+```{r}
+methods(class=class(UTSKomstat))
+summary(UTSKomstat)
+```
+
+#### c.Buatlah kelas baru "Tugas" dengan sistem kelas S3, buatlah objek baru yang bernama "UAS", dengan objek tersebut merupakan Salinan dari objek UTSKomstat. Defenisikan class "Tugas" pada objek UAS
+
+```{r}
+UAS <- UTSKomstat
+
+class(UAS)<- "Tugas"
+```
+
+#### d.Apakah fungsi summary menampilkan hal yang sama saat diaplikasikan pada objek UAS?
+
+```{r}
+summary(UAS)
+```
+
+#### e.Buatlah fungsi yang bernama "ringkasan" dimana fungsi tersebut hanya dapat 17 diakses oleh kelas "Tugas" sehingga menampilkan keterangan sebagai berikut:
+
+```{r}
+ringkasan <- function(x){
+  if(class(x)!= "Tugas") stop("objek harus memiliki 'Tugas'")
+  
+  mean_uts = mean(x$UTS)
+  mean_prak = mean(x$Praktikum)
+
+  max_UTS = as.character(x$Nama[which.max(x$UTS)])
+  max_prak = as.character(x$Nama[which.max(x$Praktikum)])
+
+  cat("rata-rata nilai UTS mahasiswa", mean_uts, "\n")
+  cat("rata-rata nilai Praktikum mahasiswa", mean_prak,"\n")
+  cat("Nilai UTS tertinggi diraih oleh",max_UTS ,"\n")
+  cat("Nilai Parktikum tertinggi diraih oleh",max_prak, "\n")
+}
+ringkasan(UAS)
+
+```
+
+#### f.Buatlah suatu pengaturan agar objek UAS bisa menampilkan output dari fungsi summary yang diperuntukkan untuk kelas data.frame dan fungsi ringkasan
+
+```{r}
+class(UAS)<- c("data.frame")
+summary(UAS)
+```
+
+### 6. Berdasarkan no. 5 didefenisikan kelas nilai pada objek NAkomstat yang merupakan Salinan dari UTSKomstat menggunakan kelas S4. Kemudian lakukan pertanyaan f dan g dengan menggunakan system kelas S4 juga.
+
+```{r}
+setClass("Tugas2", slots = c(Data = "data.frame"))
+Nakomstat <- new("Tugas2", Data =UAS)
+
+class(Nakomstat)
+```
+```{r}
+ringkasan <- function(x){
+  if(class(x)!= "Tugas2") stop("objek harus memiliki 'Tugas'")
+  
+  mean_uts = mean(x@Data$UTS)
+  mean_prak = mean(x@Data$Praktikum)
+
+  max_UTS = as.character(x@Data$Nama[which.max(x@Data$UTS)])
+  max_prak = as.character(x@Data$Nama[which.max(x@Data$Praktikum)])
+
+  cat("rata-rata nilai UTS mahasiswa", mean_uts, "\n")
+  cat("rata-rata nilai Praktikum mahasiswa", mean_prak,"\n")
+  cat("Nilai UTS tertinggi diraih oleh",max_UTS ,"\n")
+  cat("Nilai Parktikum tertinggi diraih oleh",max_prak, "\n")
+}
+ringkasan(Nakomstat)
+```
+**Analisis** pada s4 tidak mendukung operator '$', dimana dalam s4 harus dilakuakn pengaksesan secara langsung komponen pada objek dengan operator '@'. 
