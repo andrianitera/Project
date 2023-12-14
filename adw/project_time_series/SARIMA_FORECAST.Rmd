@@ -1,0 +1,438 @@
+---
+title: Analisis Inflasi di Indonesia pada sektor Pendidikan, Rekreasi dan Olahraga
+  menggunakan Seasonal ARIMA
+author: "Kelompok 10 ADW"
+date: "2023-11-03"
+output:
+  word_document: default
+  html_document: default
+---
+
+**Anggota Kelompok 10:** <br>
+
+120450092 - Muhammad Syahid Burhanudin Robbani <br>
+
+121450090 - Andrian Agustinus Lumban Gaol <br>
+
+121450111 - Muhammad Arsal Ranjana Utama <br>
+
+121450150 - Wulan Sabina <br>
+
+# Kasus 1
+
+Data inflasi Indonesia (mtm) sektor pendidikan, rekreasi, dan olahraga periode Januari 2008 sampai dengan Desember 2015, yaitu sebanyak 96 data deret waktu.
+
+### Langkah 1: Import Dataset dan Library yang dibutuhkan
+
+```{r}
+library(readxl) #membaca data excel
+library(tseries) #package timeseries
+library(lmtest) #untuk coeftest
+library(forecast) #untuk accuracy dan prediksi
+
+data <- read_excel("C:/Users/Andrian L Gaol/Downloads/fix_2.xlsx") #import data
+```
+
+### Langkah 2 : Identifikasi Model
+
+```{r}
+plot.ts(data) #melihat plot dari data
+```
+
+```{r}
+data <- ts(data, frequency = 12, start = c(2008, 1))
+data
+
+```
+
+```{r}
+adf_result <- adf.test(data)
+adf_result
+```
+
+> Karena nilai p-value \< alpha = 0.05 maka Terima H0 atau data sudah stasioner
+
+### Langkah 3: Cek Stasioner Mean dan Varians
+
+```{r}
+acf(data, main='Plot ACF Data')
+acf(data, plot=F)
+pacf(data, main='Plot PACF Data')
+pacf(data, plot=F)
+
+acf(diff(data))
+acf(diff(data), plot=F)
+pacf(diff(data))
+pacf(diff(data), plot=F)
+```
+
+```{r}
+acf(data,lag.max=24)
+```
+
+
+```{r}
+#Mengatasi data tidak stasioner pada rataan
+datadif <-diff(data)
+plot(datadif)
+ratadiff = mean(datadif)
+abline(h=ratadiff, col='red')
+adf.test(datadif)
+```
+
+```{r}
+difs = diff(datadif, lag=12)
+plot(difs)
+adf.test(difs)
+```
+
+```{r}
+acf(diff(difs, lag.max=48))
+acf(diff(difs), plot=F)
+pacf(diff(difs, lag.max=48))
+pacf(diff(difs), plot=F)
+```
+
+## SARIMA
+
+### Langkah 4 : Menentukan Orde SARIMA (p,d,q) x (P,D,Q)s
+
+Model 1 : (,1,)x(,1,)12
+
+Model 2 :
+
+```{r}
+auto.arima(data)
+auto.arima(difs)
+```
+
+
+```{r}
+dugaan1 = arima(data, orde=c(1,0,0), seasonal=list(order=c(0,1,1),period=12), method="CSS")
+coeftest(dugaan1)
+summary(dugaan1)
+
+dugaan2 = arima(data, orde=c(0,0,1), seasonal=list(order=c(0,1,1),period=12), method="CSS")
+coeftest(dugaan2)
+summary(dugaan2)
+
+dugaan3 = arima(data, orde=c(0,0,0), seasonal=list(order=c(2,1,0),period=12), method="CSS")
+coeftest(dugaan3)
+summary(dugaan3)
+
+dugaan4 = arima(data, orde=c(5,1,4), seasonal=list(order=c(3,1,3),period=12), method="CSS")
+coeftest(dugaan4)
+summary(dugaan4)
+```
+
+```{r}
+dugaan1 = arima(data, orde=c(1,0,0), seasonal=list(order=c(0,1,1),period=12), method="CSS")
+summary(dugaan1)
+```
+
+```{r}
+dugaan2 = arima(data, orde=c(0,0,1), seasonal=list(order=c(0,1,1),period=12), method="CSS")
+summary(dugaan2)
+```
+
+```{r}
+dugaan3 = arima(data, orde=c(0,0,0), seasonal=list(order=c(2,1,0),period=12), method="CSS")
+summary(dugaan3)
+```
+
+```{r}
+dugaan4 = arima(data1, orde=c(5,1,4), seasonal=list(order=c(3,1,3),period=12), method="CSS")
+summary(dugaan4)
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+### Langkah 5 : Uji Diagnosa Model
+```{r}
+#Plot Residual
+ts.plot(dugaan1$residuals)
+checkresiduals(dugaan1,plot=T)
+```
+
+```{r}
+#Plot Residual
+ts.plot(dugaan2$residuals)
+checkresiduals(dugaan2,plot=T)
+```
+
+```{r}
+library('TSA')
+eacf(data)
+```
+
+
+```{r}
+#Plot Residual
+ts.plot(dugaan3$residuals)
+checkresiduals(dugaan3,plot=T)
+```
+
+```{r}
+checkresiduals(dugaan1,plot=T)
+```
+
+```{r}
+checkresiduals(dugaan2,plot=T)
+```
+
+```{r}
+checkresiduals(dugaan3,plot=T)
+```
+
+```{r}
+checkresiduals(dugaan4,plot=T)
+```
+
+```{r}
+# Contoh data time series
+time_series_data <- data
+
+# Transformasi logaritmik
+data1 <- log(time_series_data)
+```
+
+```{r}
+# Contoh data
+data <- data1
+
+# Uji Shapiro-Wilk
+shapiro_test_result <- shapiro.test(data1)
+
+# Tampilkan hasil uji
+print(shapiro_test_result)
+
+# Ambil nilai p-value
+p_value <- shapiro_test_result$p.value
+
+# Bandingkan dengan tingkat signifikansi yang diinginkan
+alpha <- 0.05
+
+# Lakukan pengujian hipotesis
+if (p_value < alpha) {
+  cat("Hipotesis nol ditolak, data tidak berasal dari distribusi normal.\n")
+} else {
+  cat("Tidak cukup bukti untuk menolak hipotesis nol, data berasal dari distribusi normal.\n")
+}
+```
+
+
+```{r}
+# Contoh data
+data <- data1
+
+# Uji Shapiro-Wilk
+shapiro_test_result <- shapiro.test(data1)
+
+# Tampilkan hasil uji
+print(shapiro_test_result)
+
+# Ambil nilai p-value
+p_value <- shapiro_test_result$p.value
+
+# Bandingkan dengan tingkat signifikansi yang diinginkan
+alpha <- 0.05
+
+# Lakukan pengujian hipotesis
+if (p_value < alpha) {
+  cat("Hipotesis nol ditolak, data tidak berasal dari distribusi normal.\n")
+} else {
+  cat("Tidak cukup bukti untuk menolak hipotesis nol, data berasal dari distribusi normal.\n")
+}
+```
+
+```{r}
+# Contoh data
+data <- data
+
+# Uji Kolmogorov-Smirnov
+ks_test_result <- ks.test(data, "pnorm", mean = mean(data), sd = sd(data))
+
+# Tampilkan hasil uji
+print(ks_test_result)
+
+# Ambil nilai p-value
+p_value <- ks_test_result$p.value
+
+# Bandingkan dengan tingkat signifikansi yang diinginkan
+alpha <- 0.05
+
+# Lakukan pengujian hipotesis
+if (p_value < alpha) {
+  cat("Hipotesis nol ditolak, data tidak sesuai dengan distribusi normal.\n")
+} else {
+  cat("Tidak cukup bukti untuk menolak hipotesis nol, data sesuai dengan distribusi normal.\n")
+}
+
+```
+
+```{r}
+plot.ts(data1) #melihat plot dari data
+```
+
+
+```{r}
+dugaan4 = arima(data1, orde=c(5,1,4), seasonal=list(order=c(3,1,3),period=12), method="CSS")
+summary(dugaan4)
+```
+
+
+```{r}
+#Plot Residual
+ts.plot(dugaan4$residuals)
+checkresiduals(dugaan4,plot=T)
+```
+
+```{r}
+plot(data)
+lines(fitted(dugaan1),col='blue')
+lines(fitted(dugaan2),col='red')
+```
+
+```{r}
+accuracy(dugaan1)
+accuracy(dugaan2)
+accuracy(dugaan3)
+accuracy(dugaan4)
+```
+
+### Plot Forecast
+
+```{r}
+#h = lag
+nilaiprediksi <- forecast(dugaan1, h = 5)
+plot(nilaiprediksi)
+nilaiprediksi
+
+#h = lag
+nilaiprediksi2 <- forecast(dugaan2, h = 5)
+plot(nilaiprediksi2)
+nilaiprediksi2
+
+#h = lag
+nilaiprediksi3 <- forecast(dugaan3, h = 5)
+plot(nilaiprediksi3)
+nilaiprediksi3
+
+#h = lag
+nilaiprediksi3 <- forecast(dugaan4, h = 5)
+plot(nilaiprediksi3)
+nilaiprediksi3
+```
+
+```{r}
+nilaiprediksi4 <- forecast(dugaan4, h = 3)
+plot(nilaiprediksi3)
+nilaiprediksi4
+```
+
+
+
+
+```{r}
+acf(data, main='Plot ACF Data')
+acf(data, plot=F)
+pacf(data, main='Plot PACF Data')
+pacf(data, plot=F)
+
+acf(diff(data))
+acf(diff(data), plot=F)
+pacf(diff(data))
+pacf(diff(data), plot=F)
+```
+
+## MA
+
+### Langkah 6 : Menentukan orde MA
+
+```{r}
+dugaan1ma = arima(data, orde=c(0,0,1), seasonal=list(order=c(0,0,1),period=12), method="CSS")
+coeftest(dugaan1ma)
+summary(dugaan1ma)
+```
+
+```{r}
+dugaan2ma = arima(data, orde=c(0,0,2), seasonal=list(order=c(0,0,2),period=12), method="CSS")
+coeftest(dugaan2ma)
+summary(dugaan2ma)
+```
+
+```{r}
+dugaan3ma = arima(data, orde=c(0,0,2), seasonal=list(order=c(0,0,1),period=12), method="CSS")
+coeftest(dugaan3ma)
+summary(dugaan3ma)
+```
+
+```{r}
+dugaan4ma = arima(data, orde=c(5,1,4), seasonal=list(order=c(3,1,3),period=12), method="CSS")
+coeftest(dugaan4)
+summary(dugaan4)
+```
+
+
+### Langkah 6 : Uji Diagnosa Model 
+
+```{r}
+#Plot Residual
+ts.plot(dugaan2ma$residuals)
+checkresiduals(dugaan2ma,plot=T)
+```
+
+```{r}
+plot(data)
+lines(fitted(dugaan1ma),col='blue')
+lines(fitted(dugaan2ma),col='red')
+lines(fitted(dugaan3ma),col='yellow')
+lines(fitted(dugaan3ma),col='green')
+```
+
+### Forecast
+
+```{r}
+#h = lag
+nilaiprediksima <- forecast(dugaan1ma, h = 3)
+plot(nilaiprediksima)
+nilaiprediksima
+
+#h = lag
+nilaiprediksi2ma <- forecast(dugaan2ma, h = 3)
+plot(nilaiprediksi2ma)
+nilaiprediksi2ma
+
+#h = lag
+nilaiprediksi3ma <- forecast(dugaan3ma, h = 3)
+plot(nilaiprediksi3ma)
+nilaiprediksi3ma
+
+#h = lag
+nilaiprediksi4ma <- forecast(dugaan4ma, h = 3)
+plot(nilaiprediksi4ma)
+nilaiprediksi4ma
+```
+
+
+```{r}
+nilaiprediksi4ma <- forecast(dugaan4ma, h = 3)
+plot(nilaiprediksi4ma)
+nilaiprediksi4ma
+```
+
+```{r}
+
+```
+
+
+
+
+### 
